@@ -19,13 +19,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Encore\Admin\Media\\": "src/"
+            "Encore\\Admin\\Media\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Encore\Admin\Media\MediaServiceProvider"
+                "Encore\\Admin\\Media\\MediaServiceProvider"
             ]
         }
     }

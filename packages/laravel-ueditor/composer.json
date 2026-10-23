@@ -14,7 +14,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Codingyu\LaravelUEditor\\": "src/"
+            "Codingyu\\LaravelUEditor\\": "src/"
         }
     },
     "suggest": {
@@ -23,7 +23,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Codingyu\LaravelUEditor\UEditorServiceProvider"
+                "Codingyu\\LaravelUEditor\\UEditorServiceProvider"
             ]
         }
     }
