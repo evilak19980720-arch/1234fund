@@ -69,7 +69,16 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "policy": {
+            "advisories": {
+                "ignore-id": {
+                    "PKSA-fwvh-pm3c-1m7b": "encore/laravel-admin 任意文件上传：所有版本(<=1.8.19)均受影响且无修复版本，线上原版本 1.8.11 同样受影响；后台另行做访问防护，长期计划迁移后台框架",
+                    "PKSA-j43q-24zh-tyzv": "mdanter/ecc 时序侧信道：由 fenguoz/tron-php -> fenguoz/tron-api -> kornrunner/secp256k1 0.2 间接依赖，暂无可替换版本，线上原版本 0.5.2 同样受影响",
+                    "PKSA-36gf-zqdd-tq5m": "mdanter/ecc 加密侧信道：同上，等待上游 Tron 库更新到 paragonie/ecc 后移除"
+                }
+            }
+        }
     },
     "extra": {
         "laravel": {
