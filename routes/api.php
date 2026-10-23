@@ -215,6 +215,11 @@ Route::prefix('v1')->name('api.v1.')->namespace('Api\v1')->group(function () {
         //获取客服
         Route::get('problems', 'ProblemsController@reply')->name('Problems.reply');
 
+        // 站内在线客服（游客也可使用，登录用户带 token）
+        Route::get('cs/config', 'CsController@config')->name('cs.config');
+        Route::get('cs/messages', 'CsController@messages')->name('cs.messages');
+        Route::post('cs/messages', 'CsController@send')->name('cs.send');
+
         // 假提现记录
         Route::get('orderscopy', 'OrderController@indexcopy')->name('order.indexcopy');
 

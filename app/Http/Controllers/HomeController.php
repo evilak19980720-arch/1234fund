@@ -9,7 +9,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\AgentConf;
 use App\Models\Configuration;
+use App\Services\CustomerService\CsSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Env;
 use Illuminate\Support\Facades\Cache;
@@ -21,7 +23,12 @@ class HomeController extends Controller
 {
 
     public function customer(Request $request){
-        $url = Configuration::getItem('customer_service_url');
+        // 后台设置为本站客服时，跳转到 H5 的站内客服页
+        if (CsSettings::mode() === CsSettings::MODE_INTERNAL) {
+            $url = rtrim((string) app(AgentConf::class)->getH5Url(null), '/') . '/service';
+        } else {
+            $url = Configuration::getItem('customer_service_url');
+        }
         header("location:$url");
     }
 

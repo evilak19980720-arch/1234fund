@@ -77,6 +77,13 @@ Route::group([
     $router->resource('version', VersionController::class);
     // 客服
     $router->resource('customers', CustomerController::class);
+    // 站内在线客服
+    $router->get('cs-sessions/{id}/messages', 'CsSessionController@messages');
+    $router->post('cs-sessions/{id}/reply', 'CsSessionController@reply');
+    $router->post('cs-sessions/{id}/status', 'CsSessionController@status');
+    $router->resource('cs-sessions', CsSessionController::class)->only(['index', 'show']);
+    $router->get('cs-settings', 'CsSettingController@index');
+    $router->post('cs-settings', 'CsSettingController@store');
     // 文章
     $router->resource('articles', ArticleController::class);
     // 安装数量
