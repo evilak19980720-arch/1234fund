@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Http\Resources;
+
+use App\Models\ChinaArea;
+use App\Models\Configuration;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Env;
+
+class UserResource extends JsonResource
+{
+    public function toArray($request)
+    {
+        $this->resource->makeHidden('relation', 'updated_at', 'vip_id','p')->toArray();
+
+        $data = parent::toArray($request);
+        isset($data['created_at']) && $data['created_at'] = $this->resource->created_at->timestamp;
+        if (isset($data['card'])) {
+            unset($data['card']);
+        }
+        if (isset($data['vip']['cost_price'])) {
+            unset($data['vip']['cost_price']);
+        }
+        if (isset($data['vip']['discount_price'])) {
+            unset($data['vip']['discount_price']);
+        }
+        if (isset($data['vip']['salary'])) {
+            unset($data['vip']['salary']);
+        }
+        if (isset($data['vip']['quantity'])) {
+            unset($data['vip']['quantity']);
+        }
+        if (isset($data['vip']['state'])) {
+            unset($data['vip']['state']);
+        }
+        if (isset($data['vip']['recharge_amount'])) {
+            unset($data['vip']['recharge_amount']);
+        }
+        //if (isset($data['hierarchy_id'])) {
+        //    unset($data['hierarchy_id']);
+        //}
+        if (isset($data['payment_password']) && $data['payment_password']) {
+            $data['payment_password'] = true;
+        } else {
+            $data['payment_password'] = false;
+        }
+        if (empty($this->resource->relation)) {
+            $data['parent_id'] = 0;
+        } else {
+            $user_ids = explode(',', trim($this->resource->relation, ','));
+            $user_ids = array_reverse($user_ids);
+            $data['parent_id'] = $user_ids[0];
+        }
+        $data['invite_code'] = $data['id'];
+        //$data['invite_url'] = Env::get('H5URL') . '/register?invite_code=' . $data['invite_code'];
+        $data['invite_url'] = '/register?invite_code=' . $data['invite_code'];
+        $data['invite_desc'] = transtableadmin('configuration.Invite_copy');//  Configuration::getItem('');
+        $data['avatar'] = $data['avatar'] ? sprintf('%s/%s', aliyun_domain(), $data['avatar']) : '';
+        $data['friends_reward'] = Configuration::getItem('friends_reward');
+        $data['join_group_link'] = Configuration::getItem('join_group_link');
+        return $data;
+    }
+}

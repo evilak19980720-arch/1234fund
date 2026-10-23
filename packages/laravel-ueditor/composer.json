@@ -1,0 +1,30 @@
+{
+    "name": "codingyu/laravel-ueditor",
+    "description": "UEditor integration for Laravel. (Local copy of codingyu/laravel-ueditor 2.0.2, adapted for Laravel 10 / Flysystem 3)",
+    "version": "2.0.3",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "codingyu",
+            "email": "everceyu@gmail.com"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codingyu\LaravelUEditor\\": "src/"
+        }
+    },
+    "suggest": {
+        "overtrue/laravel-filesystem-qiniu": "如果你想要使用七牛云存储，也许你需要安装它哦~"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Codingyu\LaravelUEditor\UEditorServiceProvider"
+            ]
+        }
+    }
+}

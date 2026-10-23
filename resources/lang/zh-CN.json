@@ -1,0 +1,15 @@
+{
+  "Start at":"开始时间",
+  "End at":"结束时间",
+  "Pet id": "宠物ID",
+  "Act buying price": "活动购买价格",
+  "Act selling price": "活动卖出价格",
+  "Act profit": "回报",
+  "Act day": "回报周期(天)",
+  "Max stock quantity": "最大库存数",
+  "Created at": "创建时间",
+  "Updated at": "更新时间",
+  "Deleted at": "删除时间",
+  "Weigh": "权重",
+  "State": "状态"
+}

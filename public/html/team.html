@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=0.5, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>profit</title>
+    <script>
+        (function(win,lib){var doc=win.document;var docEl=doc.documentElement;var metaEl=doc.querySelector('meta[name="viewport"]');var flexibleEl=doc.querySelector('meta[name="flexible"]');var dpr=0;var scale=0;var tid;var flexible=lib.flexible||(lib.flexible={});if(metaEl){var match=metaEl.getAttribute("content").match(/initial\-scale=([\d\.]+)/);if(match){scale=parseFloat(match[1]);dpr=parseInt(1/scale)}}else{if(flexibleEl){var content=flexibleEl.getAttribute("content");if(content){var initialDpr=content.match(/initial\-dpr=([\d\.]+)/);var maximumDpr=content.match(/maximum\-dpr=([\d\.]+)/);if(initialDpr){dpr=parseFloat(initialDpr[1]);scale=parseFloat((1/dpr).toFixed(2))}if(maximumDpr){dpr=parseFloat(maximumDpr[1]);scale=parseFloat((1/dpr).toFixed(2))}}}}if(!dpr&&!scale){var isAndroid=win.navigator.appVersion.match(/android/gi);var isIPhone=win.navigator.appVersion.match(/iphone/gi);var devicePixelRatio=win.devicePixelRatio;if(isIPhone){if(devicePixelRatio>=3&&(!dpr||dpr>=3)){dpr=3}else{if(devicePixelRatio>=2&&(!dpr||dpr>=2)){dpr=2}else{dpr=1}}}else{dpr=1}scale=1/dpr}docEl.setAttribute("data-dpr",dpr);if(!metaEl){metaEl=doc.createElement("meta");metaEl.setAttribute("name","viewport");metaEl.setAttribute("content","initial-scale="+scale+", maximum-scale="+scale+", minimum-scale="+scale+", user-scalable=no");if(docEl.firstElementChild){docEl.firstElementChild.appendChild(metaEl)}else{var wrap=doc.createElement("div");wrap.appendChild(metaEl);doc.write(wrap.innerHTML)}}function refreshRem(){var width=docEl.getBoundingClientRect().width;if(width/dpr>540){width=540*dpr}var rem=width/10;docEl.style.fontSize=rem+"px";flexible.rem=win.rem=rem}win.addEventListener("resize",function(){clearTimeout(tid);tid=setTimeout(refreshRem,300)},false);win.addEventListener("pageshow",function(e){if(e.persisted){clearTimeout(tid);tid=setTimeout(refreshRem,300)}},false);if(doc.readyState==="complete"){doc.body.style.fontSize=12*dpr+"px"}else{doc.addEventListener("DOMContentLoaded",function(e){doc.body.style.fontSize=12*dpr+"px"},false)}refreshRem();flexible.dpr=win.dpr=dpr;flexible.refreshRem=refreshRem;flexible.rem2px=function(d){var val=parseFloat(d)*this.rem;if(typeof d==="string"&&d.match(/rem$/)){val+="px"}return val};flexible.px2rem=function(d){var val=parseFloat(d)/this.rem;if(typeof d==="string"&&d.match(/px$/)){val+="rem"}return val}})(window,window["lib"]||(window["lib"]={}));
+    </script>
+    <style type="text/css">
+        html {
+
+        }
+        body {
+            margin: 0;
+            color: #000000;
+            background-color: #ffffff;
+            box-sizing: border-box;
+            padding: 0 10px;
+        }
+        .title {
+            color: rgba(255, 59, 34, 1.00);
+            margin: 1rem;
+            font-size: 0.78rem;
+            font-weight: bold;
+            height: 100%;
+        }
+         .text {
+				/* border-radius: 0.25rem; */
+				padding: 0.5rem;
+				/* margin: 0.5rem; */
+				color: #333;
+				line-height: 0.5rem;
+				text-align: justify;
+				font-size: 0.3rem;
+				height: 100%;
+			}
+			.table table {
+				border: 1px solid rgba(255, 148, 114, 1.00);
+			}
+			table tbody tr {
+
+			}
+			table tbody tr td{
+				text-align: center;
+				vertical-align:center;
+				background:#fff;
+                padding: 3px 0;
+			}
+			.table {
+                margin: 0.1rem 0.1rem 0.1rem 0.1rem;
+				/* padding:0 0.5rem 0 0 ; */
+                font-size: 0.25rem;
+				color: #333;
+			}
+
+/*
+        .text {
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            background-color: #ffffff;
+            color: rgba(211, 211, 211, 1.00);
+            line-height: 1rem;
+            text-align: justify;
+            font-size: 0.55rem;
+            height: 100%;
+        }
+
+        .img {
+            width: 100%;
+            height: auto;
+        }
+
+        .img img {
+            width: 100%;
+            height: auto;
+        }
+
+        .table {
+            margin: 0.5rem;
+            background-color: #ffffff;
+            font-size: 0.1rem;
+            color: rgba(114, 177, 216, 1.00);
+        }
+
+        .table table {
+            border: 2px solid rgba(255, 255, 255, 1.00);
+        }
+
+        table tbody tr {
+
+            height: 1.4rem;
+            background-color: #ffffff;
+        }
+        table tbody tr td{
+            text-align: center;
+            vertical-align:top;
+            background-color: #ffffff;
+        } */
+    </style>
+</head>
+<body>
+    <div class="title">Membership Level And Benefits</div>
+    <div class="table">
+        <table width="100%" border="2" cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr>
+                    <td width="14%"  >level </td>
+                    <td width="14%"  >general</td>
+                    <td width="14%" >VIP 1</td>
+                    <td width="14%" >VIP 2</td>
+                    <td width="14%" >VIP 3</td>
+                    <td width="14%" >VIP 4</td>
+                    <td width="14%" >VIP 5</td>
+                </tr>
+                <tr>
+                    <td style="">cost</td>
+                    <td>0<br>₹</td>
+                    <td>1000<br>₹</td>
+                    <td>6000<br>₹</td>
+                    <td>15000<br>₹ </td>
+                    <td>45000<br>₹</td>
+                    <td>90000<br>₹</td>
+                </tr>
+                <tr>
+                    <td style="">salary<br>per task</td>
+                    <td>10<br>₹</td>
+                    <td>10<br>₹</td>
+                    <td>20<br>₹</td>
+                    <td>20<br>₹ </td>
+                    <td>45<br>₹</td>
+                    <td>60<br>₹</td>
+                </tr>
+                <tr>
+                    <td style="">daily<br>tasks</td>
+                    <td>2</td>
+                    <td>5</td>
+                    <td>15</td>
+                    <td>35</td>
+                    <td>50</td>
+                    <td>75</td>
+                </tr>
+                <tr>
+                    <td style="">daily<br>income</td>
+                    <td>20<br>₹</td>
+                    <td>50<br>₹</td>
+                    <td>300<br>₹</td>
+                    <td>700<br>₹ </td>
+                    <td>2250<br>₹</td>
+                    <td>4500<br>₹</td>
+                </tr>
+                <tr>
+                    <td style="">monthly <br>income</td>
+                    <td>60 <br>₹</td>
+                    <td>1500<br>₹</td>
+                    <td>9000<br>₹</td>
+                    <td>21000 <br>₹ </td>
+                    <td>67500 <br>₹</td>
+                    <td>135000 <br>₹</td>
+                </tr>
+                <tr>
+                    <td style="">Annual  <br>income</td>
+                    <td>60<br>₹</td>
+                    <td>18000<br>₹</td>
+                    <td>108000<br>₹</td>
+                    <td>252000<br>₹ </td>
+                    <td>810000<br>₹</td>
+                    <td>1620000<br>₹</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="text" style="color: #333;">
+        For example:<br>
+        Top up 15,000₹ to become VIP3, you can receive 35 tasks per day, earn 20₹ for a task, Daily income is at least 700 ₹. You can recover the cost within 20 days. If you continue to do tasks in the future, it will be a pure profit.
+        <text style="font-weight: bold;">
+            You can earn at least Rs 21,000₹ per month ＆ 252,000₹ a year.
+        </text><br>
+        Top up 90,000₹ to become VIP5, you can receive 75 tasks per day, earn 60₹ for a task, Daily income is at least 4,500 ₹. You can recover the cost within 20 days. If you continue to do tasks in the future, it will be a pure profit.
+        <text style="font-weight: bold;">
+            You can earn at least Rs 135,000₹ per month ＆ 1,620,000₹ a year.
+        </text>
+
+    </div>
+
+    <div class="title">Three-level Marketing Recharge Income</div>
+
+    <div class="table min">
+        <table width="100%" border="1" cellpadding="0" cellspacing="0">
+            <tbody>
+                <tr style="font-weight: bold;">
+                    <td rowspan="2" width="16.66%"  style="text-align: center;"> <br>Your<br> VIP <br> level</td>
+                    <td colspan="5" >First Level Marketing</td>
+                </tr>
+                <tr style="font-weight: bold;">
+                    <td colspan="5" >commission: 15%</td>
+                </tr>
+                <tr>
+                    <td rowspan="2" width="16.66%"  style="">VIP 1</td>
+                    <td width="16.66%" >VIP 1</td>
+                    <td width="16.66%" >VIP 2</td>
+                    <td width="16.66%" >VIP 3</td>
+                    <td width="16.66%">VIP 4</td>
+                    <td width="16.66%" >VIP 5</td>
+                </tr>
+                <tr>
+                    <td width="16.66%">1000*15%</td>
+                    <td width="16.66%">1000*15%</td>
+                    <td width="16.66%" >1000*15%</td>
+                    <td width="16.66%">1000*15%</td>
+                    <td width="16.66%">1000*15%</td>
+
+                </tr>
+                <tr>
+                    <td rowspan="2" width="16.66%"  style="">VIP 2</td>
+                    <td width="16.66%" >VIP 1</td>
+                    <td width="16.66%">VIP 2</td>
+                    <td width="16.66%" >VIP 3</td>
+                    <td width="16.66%">VIP 4</td>
+                    <td width="16.66%" >VIP 5</td>
+                </tr>
+                <tr>
+                    <td width="16.66%" >1000*15%</td>
+                    <td width="16.66%" >6000*15%</td>
+                    <td width="16.66%">6000*15%</td>
+                    <td width="16.66%">6000*15%</td>
+                    <td width="16.66%">6000*15%</td>
+
+                </tr>
+                <tr>
+                    <td rowspan="2" width="16.66%"  style="">VIP 3</td>
+                    <td width="16.66%" >VIP 1</td>
+                    <td width="16.66%" >VIP 2</td>
+                    <td width="16.66%" >VIP 3</td>
+                    <td width="16.66%" >VIP 4</td>
+                    <td width="16.66%" >VIP 5</td>
+                </tr>
+                <tr>
+                    <td width="16.66%" >1000*15%</td>
+                    <td width="16.66%" >6000*15%</td>
+                    <td width="16.66%" >15000*15%</td>
+                    <td width="16.66%" >15000*15%</td>
+                    <td width="16.66%" >15000*15%</td>
+
+                </tr>
+                <tr>
+                    <td rowspan="2" width="16.66%"  style="">VIP 4</td>
+                    <td width="16.66%" >VIP 1</td>
+                    <td width="16.66%">VIP 2</td>
+                    <td width="16.66%" >VIP 3</td>
+                    <td width="16.66%" >VIP 4</td>
+                    <td width="16.66%" >VIP 5</td>
+                </tr>
+                <tr>
+                    <td width="16.66%" >1000*15%</td>
+                    <td width="16.66%" >6000*15%</td>
+                    <td width="16.66%" >15000*15%</td>
+                    <td width="16.66%" >45000*15%</td>
+                    <td width="16.66%">45000*15%</td>
+
+                </tr>
+                <tr>
+                    <td rowspan="2" width="16.66%"  style="">VIP 5</td>
+                    <td width="16.66%" >VIP 1</td>
+                    <td width="16.66%">VIP 2</td>
+                    <td width="16.66%" >VIP 3</td>
+                    <td width="16.66%" >VIP 4</td>
+                    <td width="16.66%" >VIP 5</td>
+                </tr>
+                <tr>
+                    <td width="16.66%" >1000*15%</td>
+                    <td width="16.66%">6000*15%</td>
+                    <td width="16.66%" >15000*15%</td>
+                    <td width="16.66%" >45000*15%</td>
+                    <td width="16.66%">90000*15%</td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="text" style="color: #333;">You directly invite “A” to be a VIP and enjoy a 15% commission of the VIP price.
+If your VIP level is lower than “A”'s VIP level, you can only enjoy 15% of your own VIP price.<br><br>
+        For example:<br>
+        You are VIP3 and you invite “A” to become VIP2, then your commission is 6000*15%=900
+You are VIP3 and you invite “A” to become VIP5, then your commission is 15000*15%=2250（The price of VIP3 is 15000）
+<br>
+        You can only get the commission from your friend's first recharge. For example, if your friend recharged VIP3, you got 15000*15%=2250 rupees commission, then later, if your friend upgrades from VIP3 to VIP5, you will not get the upgrade commission. Recommend you can directly ask your friends to buy VIP5<br><br>
+        <text style="font-weight: bold;">Tips: In order to get more income from the top-up of the third-level marketing, it is recommended that you buy VIP5. VIP5 has the highest income from inviting friends to be VIP5</text>
+        <!-- <div class="title">RECOMMEND SUBORDINA TES<br>TO DO TASK INCOME</div> -->
+        <br><br>
+    </div>
+        <div class="table min">
+            <table width="100%" border="1" cellpadding="0" cellspacing="0">
+                <tbody>
+                    <tr style="font-weight: bold;">
+                        <td rowspan="2" width="16.66%"  style="text-align : center "> <br>Your<br> VIP <br> level</td>
+                        <td colspan="5" >Second Level Marketing</td>
+                    </tr>
+                    <tr style="font-weight: bold;">
+                        <td colspan="5" >commission: 5%</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2" width="16.66%"  style="">VIP 1</td>
+                        <td width="16.66%" >VIP 1</td>
+                        <td width="16.66%">VIP 2</td>
+                        <td width="16.66%" >VIP 3</td>
+                        <td width="16.66%">VIP 4</td>
+                        <td width="16.66%">VIP 5</td>
+                    </tr>
+                    <tr>
+                        <td width="16.66%" >1000*5%</td>
+                        <td width="16.66%" >1000*5%</td>
+                        <td width="16.66%" >1000*5%</td>
+                        <td width="16.66%">1000*5%</td>
+                        <td width="16.66%">1000*5%</td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="2" width="16.66%"  style="">VIP 2</td>
+                        <td width="16.66%" >VIP 1</td>
+                        <td width="16.66%" >VIP 2</td>
+                        <td width="16.66%">VIP 3</td>
+                        <td width="16.66%" >VIP 4</td>
+                        <td width="16.66%" >VIP 5</td>
+                    </tr>
+                    <tr>
+                        <td width="16.66%" >1000*5%</td>
+                        <td width="16.66%" >6000*5%</td>
+                        <td width="16.66%">6000*5%</td>
+                        <td width="16.66%" >6000*5%</td>
+                        <td width="16.66%" >6000*5%</td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="2" width="16.66%"  style="">VIP 3</td>
+                        <td width="16.66%" >VIP 1</td>
+                        <td width="16.66%" >VIP 2</td>
+                        <td width="16.66%">VIP 3</td>
+                        <td width="16.66%" >VIP 4</td>
+                        <td width="16.66%">VIP 5</td>
+                    </tr>
+                    <tr>
+                        <td width="16.66%" >1000*5%</td>
+                        <td width="16.66%" >6000*5%</td>
+                        <td width="16.66%" >15000*5%</td>
+                        <td width="16.66%">15000*5%</td>
+                        <td width="16.66%" >15000*5%</td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="2" width="16.66%" style="">VIP 4</td>
+                        <td width="16.66%" >VIP 1</td>
+                        <td width="16.66%" >VIP 2</td>
+                        <td width="16.66%" >VIP 3</td>
+                        <td width="16.66%" >VIP 4</td>
+                        <td width="16.66%" >VIP 5</td>
+                    </tr>
+                    <tr>
+                        <td width="16.66%" >1000*5%</td>
+                        <td width="16.66%" >6000*5%</td>
+                        <td width="16.66%">15000*5%</td>
+                        <td width="16.66%" >45000*5%</td>
+                        <td width="16.66%" >45000*5%</td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="2" width="16.66%" style="">VIP 5</td>
+                        <td width="16.66%" >VIP 1</td>
+                        <td width="16.66%" >VIP 2</td>
+                        <td width="16.66%" >VIP 3</td>
+                        <td width="16.66%" >VIP 4</td>
+                        <td width="16.66%" >VIP 5</td>
+                    </tr>
+                    <tr >
+                        <td width="16.66%" >3000*5%</td>
+                        <td width="16.66%" >6000*5%</td>
+                        <td width="16.66%">15000*5%</td>
+                        <td width="16.66%">45000*5%</td>
+                        <td width="16.66%" >90000*5%</td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text">You invite "A" to become a member, then "A" invites "B" to become a VIP, you enjoy 5% commission of B’s VIP price<br>
+            If your VIP level is lower than “B” VIP level, you can only enjoy 5% of your own VIP price
+            <br>
+        </div>
+            <div class="table min">
+                <table width="100%" border="1" cellpadding="0" cellspacing="0">
+                    <tbody>
+                        <tr style="font-weight: bold;">
+                            <td rowspan="2" width="16.66%"  style=" text-align: center;"> <br>Your<br> VIP <br> level</td>
+                            <td colspan="5" >Third Level Marketing</td>
+                        </tr>
+                        <tr style="font-weight: bold;">
+                            <td colspan="5" >commission: 3%</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2" width="16.66%" style="">VIP 1</td>
+                            <td width="16.66%" >VIP 1</td>
+                            <td width="16.66%">VIP 2</td>
+                            <td width="16.66%" >VIP 3</td>
+                            <td width="16.66%" >VIP 4</td>
+                            <td width="16.66%" >VIP 5</td>
+                        </tr>
+                        <tr>
+                            <td width="16.66%" >1000*3%</td>
+                            <td width="16.66%" >1000*3%</td>
+                            <td width="16.66%" >1000*3%</td>
+                            <td width="16.66%" >1000*3%</td>
+                            <td width="16.66%" >1000*3%</td>
+
+                        </tr>
+                        <tr>
+                            <td rowspan="2" width="16.66%"  style="">VIP 2</td>
+                            <td width="16.66%" >VIP 1</td>
+                            <td width="16.66%" >VIP 2</td>
+                            <td width="16.66%">VIP 3</td>
+                            <td width="16.66%" >VIP 4</td>
+                            <td width="16.66%">VIP 5</td>
+                        </tr>
+                        <tr>
+                            <td width="16.66%" >1000*3%</td>
+                            <td width="16.66%" >6000*3%</td>
+                            <td width="16.66%" >6000*3%</td>
+                            <td width="16.66%" >6000*3%</td>
+                            <td width="16.66%" >6000*33%</td>
+
+                        </tr>
+                        <tr>
+                            <td rowspan="2" width="16.66%" style="">VIP 3</td>
+                            <td width="16.66%" >VIP 1</td>
+                            <td width="16.66%" >VIP 2</td>
+                            <td width="16.66%">VIP 3</td>
+                            <td width="16.66%" >VIP 4</td>
+                            <td width="16.66%" >VIP 5</td>
+                        </tr>
+                        <tr>
+                            <td width="16.66%" >1000*3%</td>
+                            <td width="16.66%" >6000*3%</td>
+                            <td width="16.66%" >15000*3%</td>
+                            <td width="16.66%" >15000*3%</td>
+                            <td width="16.66%" >15000*3%</td>
+
+                        </tr>
+                        <tr>
+                            <td rowspan="2" width="16.66%"  style="">VIP 4</td>
+                            <td width="16.66%" >VIP 1</td>
+                            <td width="16.66%" >VIP 2</td>
+                            <td width="16.66%">VIP 3</td>
+                            <td width="16.66%" >VIP 4</td>
+                            <td width="16.66%" >VIP 5</td>
+                        </tr>
+                        <tr>
+                            <td width="16.66%" >1000*3%</td>
+                            <td width="16.66%" >6000*3%</td>
+                            <td width="16.66%" >15000*3%</td>
+                            <td width="16.66%" >45000*3%</td>
+                            <td width="16.66%" >45000*3%</td>
+
+                        </tr>
+                        <tr>
+                            <td rowspan="2" width="16.66%"  style="">VIP 5</td>
+                            <td width="16.66%" >VIP 1</td>
+                            <td width="16.66%" >VIP 2</td>
+                            <td width="16.66%" >VIP 3</td>
+                            <td width="16.66%">VIP 4</td>
+                            <td width="16.66%" >VIP 5</td>
+                        </tr>
+                        <tr >
+                            <td width="16.66%" >1000*3%</td>
+                            <td width="16.66%" >6000*3%</td>
+                            <td width="16.66%" >15000*3%</td>
+                            <td width="16.66%">45000*3%</td>
+                            <td width="16.66%" >90000*3%</td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text" style="color: #333;">You invite “A” to become a member, then “A” invites “B” &amp; “B” invited “C” to become a VIP, you enjoy 3% commission of C’s VIP price.<br>
+                If your VIP level is lower than “C” VIP level, you can only enjoy 3% of your own VIP price.
+                <br>
+            </div>
+                <div class="title">Three-level marketing task income</div>
+                <div class="table">
+                    <table width="100%" border="2" cellpadding="0" cellspacing="0">
+                        <tbody>
+                            <tr>
+                                <td width="40%"  >Three-Level Marketing</td>
+                                <td width="30%" >Commission</td>
+                                <td width="30%"  >profit per 10000 ₹<br></td>
+                            </tr>
+                            <tr>
+                                <td width="40%"  style="">First Level Members</td>
+                                <td width="30%" >5%</td>
+                                <td width="30%" >500 ₹</td>
+                            </tr>
+                            <tr>
+                                <td width="40%"  style="">Second Level Members</td>
+                                <td width="30%" >2%</td>
+                                <td width="30%">200 ₹</td>
+                            </tr>
+                            <tr>
+                                <td width="40%"  style="">Third Level Members<br></td>
+                                <td width="30%" >1%</td>
+                                <td width="30%" >100 ₹</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text" style="color: #333;">In the three-level marketing model, each level of your members will contribute task income to you:<br>
+                    Your first Level Marketing members will give you 5% of his income from all tasks.<br>
+                    Your second Level Marketing members will give you 2% of his income from all tasks.<br>
+                    Your third Level Marketing members will give you 1% of his income from all tasks.<br><br>
+                    For example:<br>
+                    You invite 10 members, your first level members have 10 people, second level members have 100
+                    people, third level members have 1000 people, each person’s daliy income is 1000 INR, you can imagine your daily
+                    earnings:<br>
+                    First Level Members give you：1000*10*5%=500 ₹<br>
+                    Second Level Members give you:1000*100*2%=2000 ₹<br>
+                    Third Level Members give you:1000*1000*1%=10000 ₹<br>
+                    All of your daily Three-level marketing task income is:500+2000+10000=12500 ₹<br>
+        <br>
+        <b>Tips: In the three-level marketing model, each level of your members must purchase a VIP to contribute task income to you,If your subordinates are not VIPs, you cannot enjoy this income.</b>
+            </div>
+    <div></div>
+
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试</title>
+</head>
+<body>
+<div>服务器端推送测试</div>
+<div id="serverSendEventDiv"></div>
+</body>
+<script type="text/javascript">
+    /*
+    if(window.EventSource) {
+        const source = new EventSource("/api/v1/eventpush?userId=140307");
+        let s = '';
+        // 监听打开连接
+        source.addEventListener('open', function (e) {
+            console.log("连接打开")
+        }, false);
+        source.addEventListener('message', function (e) {
+            s += e.data + '<br/>';
+            document.getElementById("serverSendEventDiv").innerHTML = s;
+        })
+        // 监听关闭连接
+        source.addEventListener('close', function (e) {
+            if (e.readyState === EventSource.CLOSED) {
+                console.log("连接关闭")
+            } else {
+                console.log(e.readyState)
+            }
+        }, false);
+        source.addEventListener("error", function(err) {
+            console.log(JSON.stringify(err))
+            console.log(err)
+            // 类似的返回信息验证，这里是实例
+            err && err.status === 401 && console.log('not authorized')
+        })
+    } else {
+        alert("你的浏览器不支持sse")
+    }
+         */
+
+
+
+
+</script>
