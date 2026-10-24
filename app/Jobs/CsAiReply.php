@@ -32,6 +32,9 @@ class CsAiReply implements ShouldQueue
 
     public function handle(AiAgent $agent)
     {
+        // 在 PHP-FPM 请求结束后执行，放宽执行时间限制
+        @set_time_limit(180);
+
         // 同一会话串行处理，用户连发多条时只回复一次
         Cache::lock('cs_ai_reply:' . $this->sessionId, 170)->block(60, function () use ($agent) {
             $session = CsSession::query()->find($this->sessionId);

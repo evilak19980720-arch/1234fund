@@ -9,9 +9,10 @@ use App\Models\PetOrder;
 use App\Models\Problem;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 /**
- * AI 客服：组装提示词、调用 DeepSeek、执行只读查询工具
+ * AI 客服：组装提示词、调用后台选择的 AI 服务商、执行只读查询工具
  */
 class AiAgent
 {
@@ -42,56 +43,36 @@ TXT;
         Order::REFUSE => 'rejected',
     ];
 
-    const MAX_TOOL_ROUNDS = 4;
-
-    /** @var DeepSeekClient */
-    protected $client;
-
-    public function __construct(DeepSeekClient $client)
-    {
-        $this->client = $client;
-    }
-
     /**
-     * 生成一条 AI 回复
+     * 生成一条 AI 回复（使用后台「客服设置」里启用的 AI 服务商）
      * @return array{content: string, meta: array}
      */
     public function reply(CsSession $session): array
     {
-        $user = $session->isGuest() ? null : User::query()->find($session->user_id);
-        $messages = array_merge([['role' => 'system', 'content' => $this->systemPrompt($session, $user)]], $this->history($session));
-        $tools = $this->tools($user);
-        $meta = ['tools' => [], 'usage' => ['prompt_tokens' => 0, 'completion_tokens' => 0]];
-
-        for ($round = 0; $round <= self::MAX_TOOL_ROUNDS; $round++) {
-            // 最后一轮不再提供工具，强制给出文字回复
-            $result = $this->client->chat($messages, $round < self::MAX_TOOL_ROUNDS ? $tools : []);
-            $message = $result['message'];
-            $meta['usage']['prompt_tokens'] += (int) ($result['usage']['prompt_tokens'] ?? 0);
-            $meta['usage']['completion_tokens'] += (int) ($result['usage']['completion_tokens'] ?? 0);
-
-            if (empty($message['tool_calls'])) {
-                return ['content' => trim((string) ($message['content'] ?? '')), 'meta' => $meta];
-            }
-
-            $messages[] = [
-                'role' => 'assistant',
-                'content' => $message['content'] ?? '',
-                'tool_calls' => $message['tool_calls'],
-            ];
-            foreach ($message['tool_calls'] as $call) {
-                $name = $call['function']['name'] ?? '';
-                $args = json_decode($call['function']['arguments'] ?? '{}', true) ?: [];
-                $meta['tools'][] = $name;
-                $messages[] = [
-                    'role' => 'tool',
-                    'tool_call_id' => $call['id'] ?? '',
-                    'content' => json_encode($this->runTool($name, $args, $session, $user), JSON_UNESCAPED_UNICODE),
-                ];
-            }
+        $config = AiProviders::active();
+        if (!$config) {
+            throw new RuntimeException('未配置 AI 服务商');
         }
 
-        return ['content' => '', 'meta' => $meta];
+        $user = $session->isGuest() ? null : User::query()->find($session->user_id);
+        $result = AiProviders::client($config)->run(
+            $this->systemPrompt($session, $user),
+            $this->history($session),
+            $this->tools($user),
+            function (string $name, array $args) use ($session, $user) {
+                return $this->runTool($name, $args, $session, $user);
+            }
+        );
+
+        return [
+            'content' => $result['content'],
+            'meta' => [
+                'provider' => $config['provider'],
+                'model' => $config['model'],
+                'tools' => $result['tools'],
+                'usage' => $result['usage'],
+            ],
+        ];
     }
 
     protected function systemPrompt(CsSession $session, ?User $user): string
@@ -155,6 +136,10 @@ TXT;
                 $history[] = ['role' => 'assistant', 'content' => $prefix . $row->content];
             }
         }
+        // 对话必须以用户消息开头（Claude 等接口的要求）
+        while ($history && $history[0]['role'] !== 'user') {
+            array_shift($history);
+        }
         return $history;
     }
 
@@ -182,7 +167,7 @@ TXT;
 
     protected function tool(string $name, string $description, array $parameters): array
     {
-        return ['type' => 'function', 'function' => compact('name', 'description', 'parameters')];
+        return compact('name', 'description', 'parameters');
     }
 
     protected function runTool(string $name, array $args, CsSession $session, ?User $user): array

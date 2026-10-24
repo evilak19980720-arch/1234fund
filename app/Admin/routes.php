@@ -84,6 +84,8 @@ Route::group([
     $router->resource('cs-sessions', CsSessionController::class)->only(['index', 'show']);
     $router->get('cs-settings', 'CsSettingController@index');
     $router->post('cs-settings', 'CsSettingController@store');
+    $router->post('cs-settings/ai', 'CsSettingController@saveAi');
+    $router->post('cs-settings/ai-test', 'CsSettingController@testAi');
     // 文章
     $router->resource('articles', ArticleController::class);
     // 安装数量

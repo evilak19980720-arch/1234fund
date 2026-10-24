@@ -14,6 +14,7 @@
         "ext-json": "*",
         "ext-openssl": "*",
         "aliyuncs/oss-sdk-php": "^2.6",
+        "anthropic-ai/sdk": "^1.3",
         "codingyu/laravel-ueditor": "2.0.3",
         "codingyu/ueditor": "^3.0",
         "danielme85/laravel-geoip2": "^1.2",
@@ -70,6 +71,9 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        },
         "policy": {
             "advisories": {
                 "ignore-id": {

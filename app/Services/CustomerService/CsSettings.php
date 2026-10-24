@@ -22,6 +22,7 @@ class CsSettings
         'cs_ai_prompt' => ['text', '', 'AI客服提示词（业务知识、语气、话术）'],
         'cs_welcome' => ['text', 'Hello! I am the AI customer service assistant. How can I help you?', '客服欢迎语'],
         'cs_ai_daily_limit' => ['int', '50', '单个用户每天AI回复次数上限'],
+        'cs_ai_provider' => ['string', '', '当前启用的AI服务商（Key 存在 cs_ai_providers 表）'],
     ];
 
     public static function get(string $key)
@@ -40,7 +41,7 @@ class CsSettings
 
     public static function aiEnabled(): bool
     {
-        return (string) self::get('cs_ai_enabled') === '1' && config('customer_service.deepseek.api_key') !== '';
+        return (string) self::get('cs_ai_enabled') === '1' && AiProviders::active() !== null;
     }
 
     public static function save(array $values): void

@@ -90,7 +90,8 @@ class CsController extends Controller
             } elseif ($this->overDailyLimit($session)) {
                 $session->addMessage(CsMessage::ROLE_SYSTEM, 'You have reached today\'s limit for the AI assistant. Please come back tomorrow.');
             } else {
-                CsAiReply::dispatch($session->id)->onQueue(config('customer_service.queue'));
+                // 响应发出后在当前进程里生成回复，不依赖队列进程
+                CsAiReply::dispatchAfterResponse($session->id);
             }
         }
 
