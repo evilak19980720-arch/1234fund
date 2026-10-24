@@ -95,7 +95,7 @@ TXT;
         }
 
         $parts[] = "【当前用户】\n" . ($user
-            ? sprintf('已登录，用户ID %d，注册时间 %s，界面语言 %s', $user->id, (string) $user->created_at, $session->lang ?: 'unknown')
+            ? sprintf('已登录，用户ID %d，注册时间 %s，界面语言 %s（仅供参考，回复语言以用户消息为准）', $user->id, (string) $user->created_at, $session->lang ?: 'unknown')
             : '游客（未登录）');
         $parts[] = '当前时间：' . date('Y-m-d H:i:s T');
 
@@ -143,6 +143,13 @@ TXT;
         // 对话必须以用户消息开头（Claude 等接口的要求）
         while ($history && $history[0]['role'] !== 'user') {
             array_shift($history);
+        }
+
+        // 回复语言只看最新一条用户消息：之前的中文回复和中文资料会把模型带回中文，所以直接附在这条消息后面提醒
+        $last = count($history) - 1;
+        if ($last >= 0 && $history[$last]['role'] === 'user') {
+            $history[$last]['content'] .= "\n\n[Note: Reply ONLY in the language of the message above (identify it carefully, e.g. Spanish vs Portuguese). "
+                . 'Ignore the language of earlier messages, the interface language and the reference material.]';
         }
         return $history;
     }
