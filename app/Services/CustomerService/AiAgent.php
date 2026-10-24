@@ -91,13 +91,17 @@ TXT;
 
         $faq = $this->faq();
         if ($faq !== '') {
-            $parts[] = "【常见问题】\n" . $faq;
+            $parts[] = "【常见问题】\n用户的问题与下列某条意思相同（包括用其他语言提问）时，按该条答案回答，保留答案里的链接原样，不要额外添加答案里没有的内容。\n\n" . $faq;
         }
 
         $parts[] = "【当前用户】\n" . ($user
             ? sprintf('已登录，用户ID %d，注册时间 %s，界面语言 %s', $user->id, (string) $user->created_at, $session->lang ?: 'unknown')
             : '游客（未登录）');
         $parts[] = '当前时间：' . date('Y-m-d H:i:s T');
+
+        // 提示词和常见问题都是中文，模型容易跟着用中文回复，放在最后再强调一次
+        $parts[] = "【回复语言】\n以上资料是中文，但回复必须使用用户最近一条消息的语言：用户用英文就用英文回复，用西班牙语就用西班牙语回复，以此类推，需要时把资料翻译成该语言。只有用户用中文时才用中文回复。\n"
+            . 'IMPORTANT: Always reply in the same language as the user\'s latest message, translating the information above as needed.';
 
         return implode("\n\n", $parts);
     }
