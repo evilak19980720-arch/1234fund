@@ -17,12 +17,11 @@ class CsSettings
     // key => [类型, 默认值, 描述]
     const ITEMS = [
         'cs_mode' => ['string', self::MODE_EXTERNAL, '客服模式 internal:本站客服 external:第三方客服'],
-        'customer_service_url' => ['string', '', '第三方客服链接'],
+        'customer_service_url' => ['string', '', '第三方客服链接（AI 无法解答时引导用户使用）'],
         'cs_ai_enabled' => ['bool', '1', 'AI客服开关'],
         'cs_ai_prompt' => ['text', '', 'AI客服提示词（业务知识、语气、话术）'],
         'cs_welcome' => ['text', 'Hello! I am the AI customer service assistant. How can I help you?', '客服欢迎语'],
         'cs_ai_daily_limit' => ['int', '50', '单个用户每天AI回复次数上限'],
-        'cs_offline_notice' => ['text', '', '转人工后的提示（如人工客服工作时间）'],
     ];
 
     public static function get(string $key)

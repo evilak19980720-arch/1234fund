@@ -75,6 +75,13 @@ class CsController extends Controller
         }
         RateLimiter::hit($rateKey, 60);
 
+        // 不再转人工：之前停在“等待人工”的会话交回 AI（后台客服主动接管的 human 会话不受影响）
+        if ($session->status === CsSession::STATUS_PENDING) {
+            $session->status = CsSession::STATUS_AI;
+            $session->admin_unread = 0;
+            $session->save();
+        }
+
         $message = $session->addMessage(CsMessage::ROLE_USER, $content);
 
         if ($session->status === CsSession::STATUS_AI) {
@@ -114,17 +121,14 @@ class CsController extends Controller
     }
 
     /**
-     * AI 关闭时：登录用户转人工，游客提示稍后再试
+     * AI 关闭时：引导到第三方客服链接
      */
     protected function whenAiUnavailable(CsSession $session): void
     {
-        if ($session->isGuest()) {
-            $session->addMessage(CsMessage::ROLE_SYSTEM, 'Online customer service is busy. Please log in and try again later.');
-            return;
-        }
-        $session->transferToHuman('AI客服已关闭');
-        $notice = trim((string) CsSettings::get('cs_offline_notice'));
-        $session->addMessage(CsMessage::ROLE_SYSTEM, $notice !== '' ? $notice : 'Your message has been forwarded to our staff. Please wait for a reply.');
+        $url = trim((string) CsSettings::get('customer_service_url'));
+        $session->addMessage(CsMessage::ROLE_SYSTEM, $url !== ''
+            ? 'Online customer service is busy. Please contact us here: ' . $url
+            : 'Online customer service is busy. Please try again later.');
     }
 
     protected function overDailyLimit(CsSession $session): bool
