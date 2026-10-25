@@ -47,6 +47,7 @@ class Kernel extends ConsoleKernel
         }
 
         $schedule->command('orderevent')->everyTenMinutes();//超时重新推送事件
+        $schedule->command('recharge:scan')->everyFiveMinutes()->withoutOverlapping(30)->runInBackground();//补查链上充值到账
        // $schedule->command('fake:add')->hourly();//每小时给排名假数据增加值
         //$schedule->command('salesvolume:add')->everyTenMinutes();//每小时给排名假数据增加值
 

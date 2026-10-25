@@ -255,7 +255,7 @@ class TRC20Service
     public function getTransactions(string $address, $limit = 100)
     {
         return $this->tron->getManager()
-            ->request("v1/accounts/{$address}/transactions/trc20?limit={$limit}&contract_address={$this->contractAddress}", [], 'get');
+            ->request("v1/accounts/{$address}/transactions/trc20?limit={$limit}&contract_address={$this->contractAddress}&only_confirmed=true", [], 'get');
     }
 
     /**

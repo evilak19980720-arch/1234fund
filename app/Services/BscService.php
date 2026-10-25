@@ -112,7 +112,8 @@ class BscService
             'method' => 'eth_getLogs',
             'params' => [[
                 'fromBlock' => Utils::toHex($fromBlock, true),
-                'toBlock' => 'latest',
+                // 只查已有 15 个确认的区块，避免把还可能回滚的交易入账
+                'toBlock' => Utils::toHex(max(0, $currentBlock - 15), true),
                 'address' => $contractAddress,
                 'topics' => [
                     $transferEventSignature,
@@ -134,7 +135,8 @@ class BscService
                 $rpcResponse = $response->json();
 
                 if (isset($rpcResponse['result']) && is_array($rpcResponse['result'])) {
-                    $logs = array_slice($rpcResponse['result'], 0, $limit);
+                    // 日志按区块从旧到新排列，取最新的 $limit 条
+                    $logs = array_slice($rpcResponse['result'], -$limit);
 
                     // 转换为类似 BSCScan 的格式
                     $result = [];

@@ -17,6 +17,7 @@ use Encore\Admin\Traits\DefaultDatetimeFormat;
 use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
 class UserRechargeAddress extends Model
@@ -92,29 +93,41 @@ class UserRechargeAddress extends Model
   ]
      * */
     public function checkRecharge($user_id ,$attach){
+        $currery = isset($attach['currery']) ? $attach['currery']:'USDT-TRC';
         try {
-            //info($user_id);
-            //查地址
-            $currery = isset($attach['currery']) ? $attach['currery']:'USDT-TRC';
-            $address = self::getRechargeAddress($user_id,$currery);
-            //info($address);
-            switch ($currery){
-                case 'USDT-TRC':
-                    $this->getUsdtTrcTransactions($user_id, $address, $currery);
-                    break;
-                case 'TRX':
-                    $this->getTrxTransactions($user_id, $address, $currery);
-                    break;
-                case 'USDT-BSC':
-                    $this->getUsdtBscTransactions($user_id, $address, $currery);
-                    break;
-            }
+            $this->scanTransactions($user_id, $currery);
+            // 入账成功会清掉标记，查询随之停止
             if(Cache::get(sprintf(KeysHandler::USDTCHECK,$currery,$user_id)) == 1){
                 Urecharge::dispatch($user_id , ['currery' => $currery])->delay(60)->onQueue(env('REDIS_QUEUE', 'default'));
             }
         }catch (\Exception $exception){
             info('TRC充值查询失败', ['message' => $exception->getMessage(), 'file' => $exception->getFile(), 'line' => $exception->getLine()]);
-            Urecharge::dispatch($user_id ,['currery' => $currery])->delay(120)->onQueue(env('REDIS_QUEUE', 'default'));
+            // 只在查询窗口内重试，最多 5 次；之后由定时任务 recharge:scan 补查
+            $retries = (int) ($attach['retries'] ?? 0);
+            if($retries < 5 && Cache::get(sprintf(KeysHandler::USDTCHECK,$currery,$user_id)) == 1){
+                Urecharge::dispatch($user_id ,['currery' => $currery, 'retries' => $retries + 1])->delay(120)->onQueue(env('REDIS_QUEUE', 'default'));
+            }
+        }
+    }
+
+    /**
+     * 查询用户充值地址的链上转账并入账（不再派发队列任务，定时任务 recharge:scan 也直接调用）
+     */
+    public function scanTransactions($user_id, $currery){
+        $address = self::getRechargeAddress($user_id,$currery);
+        if(empty($address)){
+            return;
+        }
+        switch ($currery){
+            case 'USDT-TRC':
+                $this->getUsdtTrcTransactions($user_id, $address, $currery);
+                break;
+            case 'TRX':
+                $this->getTrxTransactions($user_id, $address, $currery);
+                break;
+            case 'USDT-BSC':
+                $this->getUsdtBscTransactions($user_id, $address, $currery);
+                break;
         }
     }
 
@@ -141,9 +154,10 @@ class UserRechargeAddress extends Model
                     $transaction_id = $tran['transaction_id'];
                     $amount = bcdiv($tran['value'],pow(10,$tran['token_info']['decimals']),2) * 100;
                     $actual_amount = $amount;
-                    $this->getTransactionSucess($user_id, $transaction_id, $amount, $actual_amount ,$currery, $tran);
-                    //更新余额
-                    CheckTrcBalance::dispatch($address)->onQueue(env('REDIS_QUEUE_LOW', 'default'));
+                    if($this->getTransactionSucess($user_id, $transaction_id, $amount, $actual_amount ,$currery, $tran)){
+                        //入账成功才更新余额
+                        CheckTrcBalance::dispatch($address)->onQueue(env('REDIS_QUEUE_LOW', 'default'));
+                    }
                 }
             }
         }
@@ -180,9 +194,10 @@ class UserRechargeAddress extends Model
                         if(!empty($curreryObj)){
                             $actual_amount = $actual_amount * 100;
                             $amount = bcdiv($actual_amount, $curreryObj->exchange_rate);
-                            $this->getTransactionSucess($user_id, $transaction_id, $amount, $actual_amount ,$currery, $tran);
-                            //更新余额
-                            CheckTrcBalance::dispatch($address)->onQueue(env('REDIS_QUEUE_LOW', 'default'));
+                            if($this->getTransactionSucess($user_id, $transaction_id, $amount, $actual_amount ,$currery, $tran)){
+                                //入账成功才更新余额
+                                CheckTrcBalance::dispatch($address)->onQueue(env('REDIS_QUEUE_LOW', 'default'));
+                            }
                         }
                     }
                 }
@@ -206,9 +221,10 @@ class UserRechargeAddress extends Model
                     $transaction_id = $tran['hash'];
                     $amount = bcdiv($tran['value'],pow(10,$tran['tokenDecimal']),2) * 100;
                     $actual_amount = $amount;
-                    $this->getTransactionSucess($user_id, $transaction_id, $amount, $actual_amount ,$currery, $tran);
-                    //更新余额
-                    CheckBscBalance::dispatch($address)->onQueue(env('REDIS_QUEUE_LOW', 'default'));
+                    if($this->getTransactionSucess($user_id, $transaction_id, $amount, $actual_amount ,$currery, $tran)){
+                        //入账成功才更新余额
+                        CheckBscBalance::dispatch($address)->onQueue(env('REDIS_QUEUE_LOW', 'default'));
+                    }
                 }
             }
         }
@@ -218,72 +234,125 @@ class UserRechargeAddress extends Model
 
     //成功的转账记录
     public function getTransactionSucess($user_id, $transaction_id, $amount, $actual_amount ,$currery, $tran){
+        $transaction_id = (string) $transaction_id;
+        if($transaction_id === '' || $amount <= 0){
+            return false;
+        }
         $min = Configuration::getItem('recharge_min');
-        if($amount >= $min){ //小于最小金额则不入账
-            //查订单
-            $order = Order::where('payment_no','=',$transaction_id)->first();
-            $platform = $currery;
-            if(!$order){
+        $platform = $currery;
 
-                //查有没有最新一个充值订单,如果有则更新,没有则新建
-                $user_order = Order::where('user_id','=',$user_id)
-                    ->where('type','=',Account::RECHARGE)
-                    ->where('state','=',0)
-                    ->where('amount','=',$amount)
-                    ->where('platform','=',$platform)
-                    ->orderByDesc('id')->first();
-                if($user_order){
-                    $user_order->amount = $amount;
-                    $user_order->actual_amount = $actual_amount;
-                    $user_order->paid_at = now();
-                    $user_order->payment_no = $transaction_id;
-                    $user_order->state = 1;
-                    $user_order->closed = 1;
-                    $user_order->platform = $platform;
-                    $user_order->payment_id = 0;
-                    $user_order->notify_response = json_encode($tran);
-                    $user_order->save();
-                }else{
-                    // 生成本地订单
-                    $user_order = new Order();
-                    $user_order->platform = $platform;
-                    $user_order->payment_id = 0;
-                    $user_order->user_id = $user_id;
-                    $user_order->amount = $amount;
-                    $user_order->actual_amount = $actual_amount;
-                    $user_order->no = only_code();
-                    $user_order->type = Account::RECHARGE;
-                    $user_order->state = 1;
-                    $user_order->paid_at = now();
-                    $user_order->closed = 1;
-                    $user_order->payment_no = $transaction_id;
-                    $user_order->notify_response = json_encode($tran);
-                    $user_order->save();
-                }
-
-
-                $user = User::where('id', '=', $user_id)->first();
-                // +钱
-                $user->increment('balance', $amount);
-                // 记账
-                Account::create([
-                    'order_id' => $user_order->id,
-                    'type' => Account::RECHARGE,
-                    'to' => $user_id,
-                    'from' => 0,
-                    'amount' => $amount,
-                    'level' => 0
-                ]);
-                //判断是否首冲
-                Order::pushFirstMes($user_order);
-                event(new UserRechargeEvent($user_order));
-
-                Cache::forget(sprintf(KeysHandler::USDTCHECK,$currery,$user_id));
-
-                return true;
+        // 整个入账在一个事务里完成；chain_deposits.tx_id 唯一，同一笔链上交易只有一个进程能插入成功，杜绝并发重复入账
+        $user_order = DB::transaction(function () use ($user_id, $transaction_id, $amount, $actual_amount, $currery, $tran, $min, $platform) {
+            $inserted = DB::table('chain_deposits')->insertOrIgnore([
+                'tx_id' => strtolower($transaction_id),
+                'currery' => $currery,
+                'user_id' => $user_id,
+                'amount' => $amount,
+                'status' => 'credited',
+                'created_at' => now(),
+            ]);
+            if(!$inserted){
+                return null;
             }
+            $deposit = DB::table('chain_deposits')->where('tx_id', strtolower($transaction_id));
+
+            // 改造前已经入账的交易
+            if(Order::where('payment_no','=',$transaction_id)->exists()){
+                $deposit->update(['status' => 'existing']);
+                return null;
+            }
+
+            // 低于最小金额不入账，但留一笔失败订单，方便用户和客服查到这笔转账
+            if($amount < $min){
+                $order = new Order();
+                $order->platform = $platform;
+                $order->payment_id = 0;
+                $order->user_id = $user_id;
+                $order->amount = $amount;
+                $order->actual_amount = $actual_amount;
+                $order->no = only_code();
+                $order->type = Account::RECHARGE;
+                $order->state = Order::FAILED;
+                $order->closed = 1;
+                $order->payment_no = $transaction_id;
+                $order->remark = 'Below minimum deposit, not credited';
+                $order->notify_response = json_encode($tran);
+                $order->save();
+                $deposit->update(['status' => 'below_min', 'order_id' => $order->id]);
+                return null;
+            }
+
+            $user = User::where('id', '=', $user_id)->lockForUpdate()->first();
+            if(!$user){
+                // 回滚，chain_deposits 记录不保留
+                throw new \RuntimeException('充值用户不存在：' . $user_id);
+            }
+
+            //查有没有最新一个充值订单,如果有则更新,没有则新建
+            $user_order = Order::where('user_id','=',$user_id)
+                ->where('type','=',Account::RECHARGE)
+                ->where('state','=',0)
+                ->where('amount','=',$amount)
+                ->where('platform','=',$platform)
+                ->orderByDesc('id')->lockForUpdate()->first();
+            if($user_order){
+                $user_order->amount = $amount;
+                $user_order->actual_amount = $actual_amount;
+                $user_order->paid_at = now();
+                $user_order->payment_no = $transaction_id;
+                $user_order->state = 1;
+                $user_order->closed = 1;
+                $user_order->platform = $platform;
+                $user_order->payment_id = 0;
+                $user_order->notify_response = json_encode($tran);
+                $user_order->save();
+            }else{
+                // 生成本地订单
+                $user_order = new Order();
+                $user_order->platform = $platform;
+                $user_order->payment_id = 0;
+                $user_order->user_id = $user_id;
+                $user_order->amount = $amount;
+                $user_order->actual_amount = $actual_amount;
+                $user_order->no = only_code();
+                $user_order->type = Account::RECHARGE;
+                $user_order->state = 1;
+                $user_order->paid_at = now();
+                $user_order->closed = 1;
+                $user_order->payment_no = $transaction_id;
+                $user_order->notify_response = json_encode($tran);
+                $user_order->save();
+            }
+
+
+            // +钱
+            $user->increment('balance', $amount);
+            // 记账
+            Account::create([
+                'order_id' => $user_order->id,
+                'type' => Account::RECHARGE,
+                'to' => $user_id,
+                'from' => 0,
+                'amount' => $amount,
+                'level' => 0
+            ]);
+            $deposit->update(['order_id' => $user_order->id]);
+
+            return $user_order;
+        });
+
+        if(!$user_order){
+            return false;
         }
 
+        // 事务提交后再推送通知、触发充值事件
+        //判断是否首冲
+        Order::pushFirstMes($user_order);
+        event(new UserRechargeEvent($user_order));
+
+        Cache::forget(sprintf(KeysHandler::USDTCHECK,$currery,$user_id));
+
+        return true;
     }
 
 

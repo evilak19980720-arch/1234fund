@@ -142,7 +142,7 @@ class TronService
     public function getTrxTransactionsToAddress(string $address)
     {
         return $this->tron->getManager()
-            ->request("v1/accounts/{$address}/transactions?limit=100", [], 'get');
+            ->request("v1/accounts/{$address}/transactions?limit=100&only_confirmed=true", [], 'get');
         //$contract = $this->tron->getTransactionsToAddress($address);
         //return $contract;
     }
