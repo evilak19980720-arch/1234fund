@@ -234,15 +234,36 @@ class UserRechargeAddress extends Model
 
     //成功的转账记录
     public function getTransactionSucess($user_id, $transaction_id, $amount, $actual_amount ,$currery, $tran){
+        $user_order = $this->creditDeposit($user_id, $transaction_id, $amount, $actual_amount, $currery, $tran);
+        if(!$user_order){
+            return false;
+        }
+
+        // 事务提交后再推送通知、触发充值事件
+        //判断是否首冲
+        Order::pushFirstMes($user_order);
+        event(new UserRechargeEvent($user_order));
+
+        Cache::forget(sprintf(KeysHandler::USDTCHECK,$currery,$user_id));
+
+        return true;
+    }
+
+    /**
+     * 入账（只写数据库，不推送通知、不触发事件）：返回入账的订单；已处理过、低于最低金额等未入账时返回 null
+     * recharge:simulate 也调用它做模拟测试
+     */
+    public function creditDeposit($user_id, $transaction_id, $amount, $actual_amount, $currery, $tran): ?Order
+    {
         $transaction_id = (string) $transaction_id;
         if($transaction_id === '' || $amount <= 0){
-            return false;
+            return null;
         }
         $min = Configuration::getItem('recharge_min');
         $platform = $currery;
 
         // 整个入账在一个事务里完成；chain_deposits.tx_id 唯一，同一笔链上交易只有一个进程能插入成功，杜绝并发重复入账
-        $user_order = DB::transaction(function () use ($user_id, $transaction_id, $amount, $actual_amount, $currery, $tran, $min, $platform) {
+        return DB::transaction(function () use ($user_id, $transaction_id, $amount, $actual_amount, $currery, $tran, $min, $platform) {
             $inserted = DB::table('chain_deposits')->insertOrIgnore([
                 'tx_id' => strtolower($transaction_id),
                 'currery' => $currery,
@@ -340,19 +361,6 @@ class UserRechargeAddress extends Model
 
             return $user_order;
         });
-
-        if(!$user_order){
-            return false;
-        }
-
-        // 事务提交后再推送通知、触发充值事件
-        //判断是否首冲
-        Order::pushFirstMes($user_order);
-        event(new UserRechargeEvent($user_order));
-
-        Cache::forget(sprintf(KeysHandler::USDTCHECK,$currery,$user_id));
-
-        return true;
     }
 
 
