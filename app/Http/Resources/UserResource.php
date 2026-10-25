@@ -54,17 +54,19 @@ class UserResource extends JsonResource
         $data['invite_code'] = $data['id'];
         //$data['invite_url'] = Env::get('H5URL') . '/register?invite_code=' . $data['invite_code'];
         $data['invite_url'] = '/register?invite_code=' . $data['invite_code'];
-        // 后台配置了分享域名就随机取一个拼成完整链接；没配置返回相对路径，前端拼当前域名
+        // 后台配置了分享域名就由后端随机取一个，放在 share_domains 里只返回这一个（前端用它拼 invite_url）；
+        // 没配置返回空数组，前端用当前域名
         $domains = array_values(array_filter(array_map(function ($domain) {
             return rtrim(trim($domain), '/');
         }, preg_split('/[,，;；\s]+/u', (string) Configuration::getItem('share_domains')))));
+        $data['share_domains'] = [];
         if ($domains) {
             $domain = $domains[array_rand($domains)];
-            // 后台只填了 a.com 时补上 https://
+            // 后台只填了 a.com 时补上 https://，前端只认 http(s):// 开头的域名
             if (!preg_match('#^https?://#i', $domain)) {
                 $domain = 'https://' . $domain;
             }
-            $data['invite_url'] = $domain . $data['invite_url'];
+            $data['share_domains'] = [$domain];
         }
         $data['invite_desc'] = transtableadmin('configuration.Invite_copy');//  Configuration::getItem('');
         $data['avatar'] = $data['avatar'] ? sprintf('%s/%s', aliyun_domain(), $data['avatar']) : '';
