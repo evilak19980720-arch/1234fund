@@ -11,7 +11,7 @@ class ChangeLocale
 {
     public function handle($request, Closure $next)
     {
-        $language = $request->header('accept-language');
+        $language = $this->language((string) $request->header('accept-language'));
         //if ($language && in_array($language,config('app.locale_list'))) {
         if ($language) {
             App::setLocale($language);
@@ -31,5 +31,16 @@ class ChangeLocale
         }
 
         return $next($request);
+    }
+
+    /**
+     * 前端传的是 en、zh 这样的语言代码，原样使用；
+     * 浏览器直接访问时是 "en-US,en;q=0.9" 这种格式，取第一个语言，否则 setLocale 会抛异常导致 500
+     */
+    protected function language(string $header): string
+    {
+        $language = trim(explode(';', explode(',', $header)[0])[0]);
+
+        return preg_match('/^[A-Za-z0-9_-]{1,20}$/', $language) ? $language : '';
     }
 }
