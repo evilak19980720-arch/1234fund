@@ -54,6 +54,10 @@ class UserResource extends JsonResource
         $data['invite_code'] = $data['id'];
         //$data['invite_url'] = Env::get('H5URL') . '/register?invite_code=' . $data['invite_code'];
         $data['invite_url'] = '/register?invite_code=' . $data['invite_code'];
+        // 后台配置的分享域名列表，前端随机取一个拼在 invite_url 前面；为空时前端用当前域名
+        $data['share_domains'] = array_values(array_filter(array_map(function ($domain) {
+            return rtrim(trim($domain), '/');
+        }, preg_split('/[,，\s]+/u', (string) Configuration::getItem('share_domains')))));
         $data['invite_desc'] = transtableadmin('configuration.Invite_copy');//  Configuration::getItem('');
         $data['avatar'] = $data['avatar'] ? sprintf('%s/%s', aliyun_domain(), $data['avatar']) : '';
         $data['friends_reward'] = Configuration::getItem('friends_reward');
