@@ -22,12 +22,20 @@ class FriendController extends Controller
 {
     public function index(FriendRequest $request)
     {
-        $user = $request->user();
+        // 公开接口：游客为 null，带 token 时识别登录用户
+        $user = auth('api')->user();
         $type = $request->get('type', 0);
-        $page = $request->get('page', 1);
-        $limit = $request->get('limit', 10);
+        $page = (int) $request->get('page', 1);
+        $limit = min(50, (int) $request->get('limit', 10));
 
-        $list = Cache::remember(sprintf(KeysHandler::FIREND, $page, $limit), KeysHandler::FIREND_Expire,function () use($user, $page, $limit,$type){
+        // 「我的」只给登录用户看
+        if($type == 1 && !$user){
+            return $this->success([]);
+        }
+
+        // 「我的」列表按用户单独缓存，不能和全部列表共用缓存
+        $cacheKey = sprintf(KeysHandler::FIREND, $page, $limit) . ($type == 1 ? ':mine:' . $user->id : '');
+        $list = Cache::remember($cacheKey, KeysHandler::FIREND_Expire,function () use($user, $page, $limit,$type){
             $page = $this->paging($page, $limit);
             $query = Friend::query()->with(['imgs', 'user' => function ($query){
                 $query->with(['vip' =>function($query){

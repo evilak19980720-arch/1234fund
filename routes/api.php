@@ -139,6 +139,9 @@ Route::prefix('v1')->name('api.v1.')->namespace('Api\v1')->group(function () {
         //获取所有国家语言
         Route::get('countries', 'HomeController@countries')->name('home.countries');
 
+        // 朋友圈列表公开，游客也能看；带 token 时仍能识别本人（mine / 点赞状态）
+        Route::get('friends', 'FriendController@index')->name('friend.index');
+
         Route::get('reward-record', 'HomeController@rewardRecord')->name('pet.rewardRecord');
         //收益记录
         Route::get('profit-record', 'HomeController@profitRecord')->name('pet.profitrecord');
@@ -367,8 +370,7 @@ Route::prefix('v1')->name('api.v1.')->namespace('Api\v1')->group(function () {
 
 
 
-            // 朋友圈
-            Route::get('friends', 'FriendController@index')->name('friend.index');
+            // 朋友圈（列表在上面公开路由里）
             Route::post('friends', 'FriendController@store')->name('friend.store');
             Route::patch('friends/{friend}', 'FriendController@update')->name('friend.update');
             Route::delete('friends/{friend}', 'FriendController@delete')->name('friend.delete');

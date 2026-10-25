@@ -16,7 +16,9 @@ class FriendResource extends JsonResource
 
     public function toArray($request)
     {
-        $user = $request->user();
+        // 列表是公开接口，游客为 null
+        $user = auth('api')->user();
+        $userId = $user ? $user->id : 0;
 
         $data = parent::toArray($request);
 
@@ -46,7 +48,7 @@ class FriendResource extends JsonResource
                 return $var;
             }, $data['imgs']);
         }
-        $data['mine'] = $data['user_id'] == $user->id;
+        $data['mine'] = $userId > 0 && $data['user_id'] == $userId;
 
         unset($data['user_id']);
         if (isset($data['updated_at']) && $data['updated_at']) {
@@ -59,7 +61,7 @@ class FriendResource extends JsonResource
         });
         $times = isset($data['times']) ? $data['times'] : 0;
         $data['up'] = count($users)+$times;
-        $data['thumbs_up'] = in_array($user->id, $users);
+        $data['thumbs_up'] = $userId > 0 && in_array($userId, $users);
 
         unset($data['times']);
 
@@ -93,6 +95,15 @@ class FriendResource extends JsonResource
         //号码链接
         if(isset($data['user']) && $data['user'] !== null && isset($data['user']['telegram_hide']) && $data['user']['telegram_hide'] == 0 && $data['mine']==false){
             $data['link'] = $data['telegram_link'];
+        }
+
+        // 接口公开后，不返回原始的 WhatsApp / Telegram 字段（页面只用上面生成的链接，用户隐藏了的就不会有链接）
+        if(isset($data['user']) && is_array($data['user'])){
+            unset($data['user']['whatsapp'], $data['user']['telegram']);
+            // 游客看到的用户名（手机号）一律打码，防止被批量抓取
+            if(!$user && isset($data['user']['name'])){
+                $data['user']['name'] = sprintf('%s****%s', substr($data['user']['name'], 0, 3), substr($data['user']['name'], -3));
+            }
         }
 
         return $data;
